@@ -1,0 +1,18 @@
+## Relevance AI Business Profile Report
+
+**Company Overview:**
+
+* **Name & Description:** Relevance AI is a software development company that provides a no-code platform for building and managing AI workforces.  Its mission is to be the home of the modern AI workforce, enabling organizations to create autonomous AI agents that perform entire roles previously dependent on humans.
+* **Website & Location:** https://relevanceai.com; Headquarters located at 132 Kippax St, Surry Hills, New South Wales 2010, AU.  Additional office in San Francisco, CA, US.
+* **Industry & Size:** Software Development; 52 employees.
+* **Mission:** To empower organizations to build and manage their own AI workforces through a user-friendly, no-code platform, automating tasks and increasing efficiency.
+* **Products and Services:** Relevance AI offers a platform with customizable AI agents for various business functions (sales, marketing, customer support, research, operations).  These agents are equipped with AI tools for data processing, API calls, and integrations.  The platform supports multiple LLMs and offers Javascript and Python SDKs.  Key agents include Bosh (sales), Inbound/Outbound AI SDRs, Lima (marketing), and Apla (account planning).  The platform is SOC 2 (Type II) certified and GDPR compliant, offering various data storage location options and robust security measures.
+
+
+**Lead Profile Summary (Benedek Zajkas):**
+
+* **Professional Experience:** Benedek Zajkas has a diverse background in business development, sales operations, management consulting, and strategy.  His current roles include Growth Operations Lead at Relevance AI and Business Partner I Advisor at RAMI Fashion.  Previous roles highlight experience in sales operations management (Intland Software), management consulting (Deloitte Hungary), market research and business development (EasyPark Group), and project management (AAM Management Information Consulting Ltd.).  His experience consistently demonstrates a focus on growth, process improvement, and strategic planning.  He has a proven track record of successfully implementing scalable processes, leading teams, and achieving significant results, such as a 30%+ YoY growth at Intland Software and raising over $75k in funding for RAMI Fashion.
+* **Education:** Benedek holds degrees in Entrepreneurship/Global business/Strategic planning (2018-2019), Strategy management and Innovation (2017-2019), and Engineering (2013-2017).  He also completed earlier education (2009-2013), the details of which are not specified.
+* **Skills & Expertise:** Benedek possesses a strong skillset encompassing business development, sales operations, strategic planning, market research, project management, and process improvement.  His experience in consulting and various industry sectors demonstrates adaptability and a broad understanding of business operations.  His leadership experience, particularly in scaling teams and implementing new processes, is a key asset.
+* **Key Insights:** Benedek's experience aligns well with Relevance AI's focus on growth and the implementation of AI-driven solutions.  His background in sales operations, coupled with his understanding of strategic planning and market research, makes him a valuable asset to the company.  His entrepreneurial spirit, demonstrated by his involvement in RAMI Fashion and Kindly, suggests a proactive and innovative approach to problem-solving.  His strong leadership skills and proven track record of success make him an ideal candidate for collaboration or partnerships focused on growth, strategic planning, and AI implementation.
+
