@@ -1,5 +1,7 @@
 # AI-Sales-Outreach-Automation
 
+![Untitled](https://github.com/user-attachments/assets/25002e0a-9ad4-4bb0-89ae-ac63796caa7d)
+
 I built an **AI-powered outreach system** designed to integrate with multiple **CRMs**, automate lead research, and enhance the lead generation process. The system analyzes **LinkedIn data**, company websites, recent news, and social media activities to gather comprehensive insights on potential leads. Based on this information, it generates detailed **analysis reports** that highlight lead challenges, gaps, and opportunities for engagement.
 
 The system also creates customized **outreach materials**, including **personalized emails**, **interview preparation scripts**, and **tailored outreach reports** that showcase how our solutions can address the lead's pain points, supported by previous results and case studies.
@@ -7,6 +9,7 @@ The system also creates customized **outreach materials**, including **personali
 For this project, I created a sample AI marketing agency, **ElevateAI Marketing Solutions**, which focuses on optimizing and automating content strategies and enhancing digital presence using AI.
 
 While designed for **ElevateAI**, this system can easily be adapted for any agency or freelancer looking to streamline their lead outreach and improve engagement with prospects. With its customizable features, it offers a powerful, automated approach to lead generation.
+
 
 ## Features
 
@@ -42,7 +45,7 @@ Automatically assess and qualify leads into "qualified" or "not qualified" based
 
 ## System Workflow
 
-The system follows a streamlined and automated process to manage lead research and outreach efficiently (check the complete worflow diagram [here]()):
+The system follows a streamlined and automated process to manage lead research and outreach efficiently (check the complete worflow diagram [here](https://github.com/kaymen99/sales-outreach-automation-langgraph/blob/main/workflow.png)):
 
 1. **Fetch Leads**:
    - Connect to your CRM to fetch new leads.
