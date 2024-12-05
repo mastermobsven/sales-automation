@@ -1,8 +1,5 @@
-import re
+import re, os
 import googleapiclient.discovery
-
-# API key for YouTube Data API
-api_key = "AIzaSyDfjpD6tN58BGB0wpCm6rjimJwGrG7_5RU"
 
 def extract_channel_name(url):
     # Regular expression to extract the channel name after '@'
@@ -12,11 +9,11 @@ def extract_channel_name(url):
     else:
         return None
 
-def get_channel_id_by_name(channel_name, api_key):
+def get_channel_id_by_name(channel_name):
     """
     Get the channel ID from the channel name.
     """
-    youtube = googleapiclient.discovery.build("youtube", "v3", developerKey=api_key)
+    youtube = googleapiclient.discovery.build("youtube", "v3", developerKey=os.getenv("YOUTUBE_API_KEY"))
     request = youtube.search().list(
         part="snippet",
         q=channel_name,
@@ -29,12 +26,12 @@ def get_channel_id_by_name(channel_name, api_key):
     else:
         raise ValueError(f"No channel found with the name: {channel_name}")
 
-def get_channel_videos_stats(channel_id, api_key):
+def get_channel_videos_stats(channel_id):
     """
     Get total videos count, details of the last 15 videos, 
     and average views and likes for all videos.
     """
-    youtube = googleapiclient.discovery.build("youtube", "v3", developerKey=api_key)
+    youtube = googleapiclient.discovery.build("youtube", "v3", developerKey=os.getenv("YOUTUBE_API_KEY"))
     
     # Fetch channel statistics for the total video count
     channel_request = youtube.channels().list(
@@ -119,8 +116,8 @@ def get_channel_videos_stats(channel_id, api_key):
     
 def get_youtube_stats(channel_url):
     channel_name = extract_channel_name(channel_url)
-    channel_id = get_channel_id_by_name(channel_name, api_key)
-    result = get_channel_videos_stats(channel_id, api_key)
+    channel_id = get_channel_id_by_name(channel_name)
+    result = get_channel_videos_stats(channel_id)
 
     last_15_videos_str = "\n".join([f"- {video['title']} (Published: {video['published_at']})" for video in result["last_15_videos"]])
 
