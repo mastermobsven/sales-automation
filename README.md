@@ -137,18 +137,21 @@ python main.py
 
 The system will connect with your CRM to fetch new leads, perform automated research, qualify leads, and generate personalized outreach materials (You can see examples of reports generated, including the personalized email in the `/reports` folder).
 
+---
+
 ### Customizing the Automation
 
-I you wish to integrate a different CRM or customize the behavior of the automation, please refer to the [Customization Guide](https://github.com/kaymen99/sales-outreach-automation-langgraph/tree/main/docs/customization.md). The guide covers:
+For developers who wish to integrate their own CRM or customize the behavior of the automation, please refer to the [Customization Guide](./CUSTOMIZATION.md). The guide covers:
 
-- **Integrating Custom CRMs**: Instructions for adding your CRM to the system by extending the base class. I already added code to interact with Airtable, Hubspot and Google Sheets.
+- **Add your own service/productt data**: The `/data` folder includes agency details and past case studies used in reports, emails, and interviews generation. You should update these files to reflect your own service/product details and your past case studies.
+- **Integrating Custom CRMs**: Instructions for adding your CRM to the system by extending the base class.
 - **Customizing Lead Statuses**: Learn how to modify the statuses used to filter and fetch leads.
 - **Updating CRM Fields**: Tailor the `update_CRM` function to handle different field names or additional fields.
 - **Customizing Prompts**: Update the prompts used for qualifying leads, generating reports, personalizing emails, and preparing interview questions.
 
 ---
 
-### Contributing
+## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request for any improvements or features you’d like to see.
 

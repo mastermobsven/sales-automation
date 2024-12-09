@@ -1,3 +1,14 @@
+# Customization
+
+### Include Your Business Data
+
+In the `/data` folder, you'll find the following files:
+
+- **agency-description.md**: Contains information about your agency or business, including name, description, and contact details. Replace this with your own agency or business details.
+- **case_studies**: Includes past case studies that will be referenced in reports, emails, and interviews. Update this file with your own case studies to personalize the generated content.
+
+Ensure that these files are updated to reflect your own company's information and the specific details you want to highlight in your outreach and reports.
+
 ## Customizing CRM Integrations
 
 ### Overview
