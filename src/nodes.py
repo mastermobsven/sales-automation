@@ -11,6 +11,13 @@ from .state import Report
 from .structured_outputs import WebsiteData, EmailResponse
 from .utils import invoke_llm, extract_company_name, get_report, get_current_date, save_reports_locally
 
+# Enable or disable sending emails directly using GMAIL
+# Should be confident about the quality of the email
+SEND_EMAIL_DIRECTLY = False
+# Enable or disable saving emails to Google Docs
+# By defauly all reports are save locally in `reports` folder
+SAVE_TO_GOOGLE_DOCS = False
+
 class OutReachAutomationNodes:
     def __init__(self, loader):
         self.lead_loader = loader
@@ -494,11 +501,12 @@ class OutReachAutomationNodes:
         )
         
         # Send email directly
-        # gmail.send_email(
-        #     recipient=email,
-        #     subject=subject,
-        #     email_content=personalized_email
-        # )
+        if SEND_EMAIL_DIRECTLY:
+            gmail.send_email(
+                recipient=email,
+                subject=subject,
+                email_content=personalized_email
+            )
         
         # Save email with reports for reference
         personalized_email_doc = Report(
@@ -561,13 +569,14 @@ class OutReachAutomationNodes:
         save_reports_locally(reports)
         
         # Save all reports to Google docs
-        # for report in reports:
-        #     self.docs_manager.add_document(
-        #         content=report.content,
-        #         doc_title=report.title,
-        #         folder_name=self.drive_folder_name,
-        #         markdown=report.is_markdown
-        #     )
+        if SAVE_TO_GOOGLE_DOCS:
+            for report in reports:
+                self.docs_manager.add_document(
+                    content=report.content,
+                    doc_title=report.title,
+                    folder_name=self.drive_folder_name,
+                    markdown=report.is_markdown
+                )
 
         return state
 

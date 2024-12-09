@@ -10,80 +10,62 @@ For this project, I created a sample AI marketing agency, **ElevateAI Marketing 
 
 While designed for **ElevateAI**, this system can easily be adapted for any agency or freelancer looking to streamline their lead outreach and improve engagement with prospects. With its customizable features, it offers a powerful, automated approach to lead generation.
 
-
 ## Features
 
 ### **Multi-CRM Integration**
 - Seamlessly connect with popular CRMs like **HubSpot**, **Airtable**, **Google Sheets**, or add your own custom CRM functionality using a standardized schema.
 
 ### **Automated Lead Research**
-- **Scrape LinkedIn Profile**: Automatically gather key information from LinkedIn to build a complete lead profile.
-- **Review Company Website**: Analyze the company’s website for relevant insights about its products, services, and overall digital presence.
-- **Analyze Company Digital Presence**: Evaluate the company’s owned blogs and social media activities across platforms like **Facebook**, **Twitter**, **YouTube**, and more.
-- **Analyze Recent Company News**: Stay updated with the latest news and announcements about the company, giving you insights into their current initiatives and challenges.
-- **Pain Point Identification**: Detect potential challenges or gaps faced by the company to better align your offerings.
-- **Report Generation**: For each analysis, generate detailed reports saved locally and in **Google Docs**. A final global research report is created, combining insights from the lead profile, company profile, and digital presence. (You can see example of reports generated in the `/reports` folder)
+- **LinkedIn Profile Scraping**: Automatically collect essential details about the lead and their company from LinkedIn to create a comprehensive profile.  
+- **Company Digital Presence Analysis**: Evaluate the company's website and blog content for insights into their products and services. Additionally, assess their social media activity across platforms like **Facebook**, **Twitter**, **YouTube**, and others.  
+- **Recent Company News Analysis**: Keep track of the latest news and announcements related to the company to gain insights into their current initiatives and challenges.  
+- **Pain Point Identification**: Identify potential challenges or gaps faced by the company, and provide tailored recommendations on how your agency's offerings and services can address them.  
+- **Report Generation**: Generate detailed reports for each analysis, which are saved both locally and in **Google Docs**. A consolidated global research report is created, combining insights from the lead profile, company profile, and digital presence. (You can find examples of the reports in the `/reports` folder.)  
 
 ### **Lead Qualification**
-Automatically assess and qualify leads into "qualified" or "not qualified" based on the gathered data and these criteria:
+Automatically assess and qualify leads based on the gathered data and your predefined criteria, here are some examples of criteria that I used:
 - **Digital Presence (Website & Blog)**: Evaluate the quality and relevance of the company’s online presence.
 - **Social Media Activity**: Analyze the company’s engagement and activity across various social media platforms.
 - **Industry Fit**: Assess how well the company aligns with your target industries and their current or potential use of **AI** and **automation** in marketing.
 - **Company Scale and Potential**: Evaluate the company’s size, growth potential, and market expansion indicators such as new hires or funding.
-- **Existing Marketing Strategy**: Understand the company’s current marketing approach to identify areas where your solutions can provide value.
 
 *Note: These criteria can be modified according to specific requirements.*
 
 ### **Personalized Outreach**
-- **Outreach Report**: Generate a customized outreach report for each lead, highlighting their challenges or gaps, how your services can address them, and referencing previously obtained results and similar case studies (uses RAG to extract them). The report is saved to **Google Docs** for easy sharing.
+- **Customized Outreach Report**: Generate a customized outreach report for each lead, highlighting their challenges or gaps, how your services can address them, and referencing previously obtained results and similar case studies (uses RAG to extract them). The report is saved to **Google Docs** for easy sharing.
 - **Create Personalized Email**: Craft personalized email templates, including a link to the custom outreach report, to engage qualified leads effectively.
 - **Prepare Personalized Interview Script**: Generate a tailored interview script, complete with **SPIN** questions, to help prepare for calls with leads and ensure productive conversations.
 
 ### **Efficient Workflow**
-- **Seamless Collaboration**: Save all research and outreach materials both locally and in **Google Docs**, ensuring easy access and collaboration across teams.
+- **Seamless Collaboration**: all generated research and outreach reports are saved both locally and in **Google Docs**, ensuring easy access and collaboration across teams.
 - **Automated CRM Updates**: Keep your CRM up to date with the latest lead status and links to generated reports, streamlining your outreach efforts.
 
 ## System Workflow
 
-The system follows a streamlined and automated process to manage lead research and outreach efficiently (check the complete worflow diagram [here](https://github.com/kaymen99/sales-outreach-automation-langgraph/blob/main/workflow.png)):
+The system follows the process to manage lead research and outreach efficiently (check the detailed workflow description [here](https://github.com/kaymen99/sales-outreach-automation-langgraph/tree/main/docs/system-workflow.md) and a visual diagram [here](https://github.com/kaymen99/sales-outreach-automation-langgraph/blob/main/workflow.png)):
 
-1. **Fetch Leads**:
-   - Connect to your CRM to fetch new leads.
-   - The system checks for remaining leads in the CRM.
-
+1. **Fetch Leads**: Connect to your CRM to fetch new leads.
 2. **Research & Insights**:
    - Gather and analyze key information for each lead:
      - Scrape **LinkedIn profiles**.
-     - Review the **company website**.
-     - Analyze **company digital presence** (blogs, social media, recent news).
-   - Generate detailed **digital presence reports** for each lead and company, combining insights from all previous analyses. (see example of reports in the `/reports` folder).
-
-3. **Lead Qualification**:
-   - Evaluate each lead based on specific criteria such as **digital presence**, **social media activity**, **industry fit**, and **company scale**.
-   - Categorize leads as **qualified** or **not qualified** based on these assessments.
-
-4. **Outreach Preparation**:
-   - For qualified leads, generate personalized outreach materials:
-     - A **customized outreach report** detailing challenges and how our services can address them, using RAG to fetch similar case studies to be referenced in the report.
-     - A **personalized email** with a link to the outreach report.
+     - Analyze **company digital presence** (website, blogs, social media, recent news).
+   - Generate detailed analysis reports for each lead combining insights from all previous research. (You can find examples of the reports in the `/reports` folder.)  
+3. **Lead Qualification**: Evaluate each lead based on specific criteria such as **digital presence**, **social media activity**, **industry fit**, or **company scale**.
+4. **Outreach Preparation**: For qualified leads, generate personalized outreach materials:
+     - A **customized outreach report** detailing identified challenges faced by the company and how our services can address them, the system will use RAG to fetch similar case studies (from our internal knowledge base) to be referenced in the report.
+     - A **personalized email** tailored to the lead with a link to the outreach report.
      - A **customized interview script** to prepare for calls with leads.
-
-5. **Update CRM**:
-   - Save all research reports and outreach materials to **Google Docs** and update the CRM with the latest lead status.
-   - The system then loops back to check for the next lead to process.
+5. **Update CRM**: All generated research and outreach materials are saved locally and to **Google Docs**, and the CRM is updated with the latest lead status and links to the reports.
 
 
-## Advantages of This System
+### Advantages of This automation
 
-- **Automated and Thorough Lead Research & Qualification**: The system automates the entire lead research process, gathering insights from multiple sources including LinkedIn, company websites, social media, and news. This ensures that no lead is overlooked, and each one is fully assessed based on a set of well-defined criteria
+- **Automated Lead Research & Qualification**: The system streamlines lead research by gathering insights from LinkedIn, company websites, social media, and more. It ensures every lead is thoroughly evaluated based on criteria tailored to your agency’s needs.
 
-- **Custom Outreach Report**: This system generates detailed, custom outreach reports for each lead. These reports demonstrate that your team has conducted a deep investigation into the lead’s business, clearly indicating how your services can address their specific challenges. By referencing your previous results and relevant case studies, this will strengthen the credibility of your outreach, significantly improving the chances of a positive response.
+- **Increased Outreach Reply Rates & Conversions**: Instead of sending a simple standalone email, the system generates a detailed audit report for each lead, attached to the email. These reports demonstrate that you’ve thoroughly researched their business, identified key challenges, and can provide tailored solutions, supported by relevant case studies. This approach increases the likelihood of positive responses, boosting your outreach reply rates and conversions.
 
-- **Increased Outreach Reply Rates & Conversions**: By showcasing your expertise and providing value through a tailored report, the system makes your outreach more relevant and compelling. Leads are more likely to respond positively when they see that you understand their business and can offer a tailored solution backed by proof of past success.
+- **Time-Saving & Optimized Team Efficiency**: By automating lead research and generating reports with valuable insights, challenges, and recommendations, the system saves time and enhances teamwork. It provides a prepared interview script to help your team engage clients effectively during calls, and the comprehensive reports enable them to quickly craft and present tailored solutions to potential clients.
 
-- **Scalable, Efficient, and Time-Saving**: The system allows you to handle an increasing number of leads without compromising on quality or research depth. By automating time-consuming tasks like lead research, report generation, and CRM updates, it reduces manual effort and accelerates the process. 
-
-- **Enhanced Collaboration**: With all research and outreach materials saved to Google Docs, your team can easily collaborate on lead strategies, share insights, and refine outreach tactics, making the process even more efficient.
 
 ## Integration with APIs
 
@@ -153,9 +135,20 @@ Run the main script to begin automation:
 python main.py
 ```
 
-The system will connect with your CRM to fetch new leads, perform automated research, qualify leads, and generate personalized outreach materials (You can see example of reports generated, including the personalized email in the `/reports` folder).
+The system will connect with your CRM to fetch new leads, perform automated research, qualify leads, and generate personalized outreach materials (You can see examples of reports generated, including the personalized email in the `/reports` folder).
 
-## Contributing
+### Customizing the Automation
+
+I you wish to integrate a different CRM or customize the behavior of the automation, please refer to the [Customization Guide](https://github.com/kaymen99/sales-outreach-automation-langgraph/tree/main/docs/customization.md). The guide covers:
+
+- **Integrating Custom CRMs**: Instructions for adding your CRM to the system by extending the base class. I already added code to interact with Airtable, Hubspot and Google Sheets.
+- **Customizing Lead Statuses**: Learn how to modify the statuses used to filter and fetch leads.
+- **Updating CRM Fields**: Tailor the `update_CRM` function to handle different field names or additional fields.
+- **Customizing Prompts**: Update the prompts used for qualifying leads, generating reports, personalizing emails, and preparing interview questions.
+
+---
+
+### Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request for any improvements or features you’d like to see.
 
