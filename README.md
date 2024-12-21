@@ -78,9 +78,8 @@ The system follows the process to manage lead research and outreach efficiently 
 
 ## Tech Stack
 
-- **[Langchain](https://python.langchain.com/docs/introduction/)**: Framework for interacting with LLMs and building AI agents and RAG applications.
+- **[Langchain](https://python.langchain.com/docs/introduction/)**: Framework for interacting with multiple LLMs like GPT-4, Gemini, LLAMA3 and building AI agents and RAG applications.
 - **[Langgraph](https://langchain-ai.github.io/langgraph/)**: Framework for building AI agents and automation workflows.
-- **[Litellm](https://www.litellm.ai/)**: Easily integrates with multiple LLMs like GPT-4, Gemini, LLAMA3 using a unified structure.
 
 ## How to Run
 
