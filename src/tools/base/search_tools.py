@@ -1,6 +1,20 @@
 import os
-import requests
 import json
+import requests
+
+def google_search(query):
+    """
+    Performs a Google search using the provided query.
+    """
+    url = "https://google.serper.dev/search"
+    payload = json.dumps({"q": query})
+    headers = {
+        'X-API-KEY': os.environ['SERPER_API_KEY'],
+        'content-type': 'application/json'
+    }
+    response = requests.request("POST", url, headers=headers, data=payload)
+    results = response.json().get('organic', [])
+    return results
 
 def get_recent_news(company: str) -> str:
     url = "https://google.serper.dev/news"
@@ -40,5 +54,3 @@ def get_recent_news(company: str) -> str:
         return news_string
     else:
         return f"Error fetching news: {response.status_code}"
-
-

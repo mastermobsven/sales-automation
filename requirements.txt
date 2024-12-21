@@ -2,9 +2,9 @@ langgraph
 langchain-core
 langchain_community 
 langchain_google_genai
+langchain_openai
 langchain_chroma
 chromadb
-litellm
 hubspot-api-client
 pyairtable
 google-api-python-client

@@ -33,6 +33,7 @@ class OutReachAutomation:
         graph.add_node("analyze_recent_news", nodes.analyze_recent_news)
         graph.add_node("generate_full_lead_research_report", nodes.generate_full_lead_research_report)
         graph.add_node("generate_digital_presence_report", nodes.generate_digital_presence_report)
+        graph.add_node("score_lead", nodes.score_lead)
 
         # Outreach preparation phase
         graph.add_node("create_outreach_materials", nodes.create_outreach_materials)

@@ -1,15 +1,16 @@
 from colorama import Fore, Style
+from .tools.base.markdown_scraper_tool import scrape_website_to_markdown
+from .tools.base.search_tools import get_recent_news
+from .tools.base.gmail_tools import GmailTools
 from .tools.google_docs_tools import GoogleDocsManager
-from .tools.gmail_tools import GmailTools
-from .tools.linkedin_tools import search_lead_profile, search_lead_company
-from .tools.markdown_scraper_tool import scrape_website_to_markdown
+from .tools.lead_research import research_lead_on_linkedin
+from .tools.company_research import research_lead_company
 from .tools.youtube_tools import get_youtube_stats
-from .tools.news_tool import get_recent_news
 from .tools.rag_tool import fetch_similar_case_study
 from .prompts import *
-from .state import Report
+from .state import LeadData, CompanyData, Report, GraphInputState, GraphState
 from .structured_outputs import WebsiteData, EmailResponse
-from .utils import invoke_llm, extract_company_name, get_report, get_current_date, save_reports_locally
+from .utils import invoke_llm, get_report, get_current_date, save_reports_locally
 
 # Enable or disable sending emails directly using GMAIL
 # Should be confident about the quality of the email
@@ -24,33 +25,42 @@ class OutReachAutomationNodes:
         self.docs_manager = GoogleDocsManager()
         self.drive_folder_name = ""
 
-    def get_new_leads(self, state):
+    def get_new_leads(self, state: GraphInputState):
         print(Fore.YELLOW + "----- Fetching new leads -----\n" + Style.RESET_ALL)
         
         # Fetch new leads using the provided loader
-        leads = self.lead_loader.fetch_new_leads()
+        raw_leads = self.lead_loader.fetch_records()
+        
+        # Structure the leads
+        leads = [
+            LeadData(
+                id=lead["id"],
+                name=f'{lead.get("First Name", "")} {lead.get("Last Name", "")}',
+                email=lead.get("Email", ""),
+                phone=lead.get("Phone", ""),
+                address=lead.get("Address", ""),
+                profile="" # will be constructed
+            )
+            for lead in raw_leads
+        ]
         
         print(Fore.YELLOW + f"----- Fetched {len(leads)} leads -----\n" + Style.RESET_ALL)
-        return {"leads": leads, "num_leads": len(leads)}
+        return {"leads_data": leads, "number_leads": len(leads)}
     
     @staticmethod
-    def check_for_remaining_leads(state):
+    def check_for_remaining_leads(state: GraphState):
+        """Checks for remaining leads and updates lead_data in the state."""
         print(Fore.YELLOW + "----- Checking for remaining leads -----\n" + Style.RESET_ALL)
-        leads = state["leads"]
-        lead_data = state["lead_data"]
-        if len(leads) > 0:
-            lead_data.id = str(leads[-1]["id"])
-            lead_data.name = leads[-1]["name"]
-            lead_data.email = leads[-1]["email"]
-            lead_data.profile = ""
-            
-            # Remove the lead being processed
-            leads.pop()
-        return {"lead_data": lead_data}
+        
+        current_lead = None
+        if state["leads_data"]:
+            current_lead = state["leads_data"].pop()
+        return {"current_lead": current_lead}
 
     @staticmethod
-    def check_if_there_more_leads(state):
-        num_leads = state["num_leads"]
+    def check_if_there_more_leads(state: GraphState):
+        # Number of leads remaining
+        num_leads = state["number_leads"]
         if num_leads > 0:
             print(Fore.YELLOW + f"----- Found {num_leads} more leads -----\n" + Style.RESET_ALL)
             return "Found leads"
@@ -58,43 +68,41 @@ class OutReachAutomationNodes:
             print(Fore.GREEN + "----- Finished, No more leads -----\n" + Style.RESET_ALL)
             return "No more leads"
 
-    def fetch_linkedin_profile_data(self, state):
+    def fetch_linkedin_profile_data(self, state: GraphState):
         print(Fore.YELLOW + "----- Searching Lead data on LinkedIn -----\n" + Style.RESET_ALL)
-        lead_data = state["lead_data"]
-        company_data = state["company_data"]
-
-        # extract company name from pro email
-        company_name = extract_company_name(lead_data.email)
-        company_data.name = company_name
+        lead_data = state["current_lead"]
+        company_data = state.get("company_data", CompanyData())
         
-        # scrape lead linkedin profile
-        lead_profile = search_lead_profile(lead_data.name, company_name)
-        lead_data.profile = str(lead_profile)
+        # Scrape lead linkedin profile
+        (
+            lead_profile, 
+            company_name, 
+            company_website,
+            company_linkedin_url
+        ) = research_lead_on_linkedin(lead_data.name, lead_data.email)
+        lead_data.profile = lead_profile
 
-        # scrape company linkedin
-        company_profile = search_lead_company(company_name)
+        # Research company on linkedin and scrape website
+        company_profile = research_lead_company(company_linkedin_url, company_website)
         
         # Update company name from LinkedIn data
-        company_data.name = company_profile["company_name"]
-        company_data.profile = str(company_profile)
-        
-        # Get company website
-        if "company_website" in company_profile:
-            company_data.website = company_profile["company_website"]
+        company_data.name = company_name
+        company_data.website = company_website
+        company_data.profile = company_profile
             
         # Update folder name for saving reports in Drive
         self.drive_folder_name = f"{lead_data.name}_{company_data.name}"
         
         return {
-            "lead_data": lead_data,
+            "current_lead": lead_data,
             "company_data": company_data,
             "reports": []
         }
     
-    def review_company_website(self, state):
+    def review_company_website(self, state: GraphState):
         print(Fore.YELLOW + "----- Scraping company website -----\n" + Style.RESET_ALL)
-        lead_data = state["lead_data"]
-        company_data = state["company_data"]
+        lead_data = state.get("current_lead")
+        company_data = state.get("company_data")
         
         company_website = company_data.website
         if company_website:
@@ -103,40 +111,31 @@ class OutReachAutomationNodes:
             website_info = invoke_llm(
                 system_prompt=WEBSITE_ANALYSIS_PROMPT.format(main_url=company_website), 
                 user_message=content,
-                model="gemini/gemini-1.5-flash",
-                response_format=WebsiteData, 
-                json_output=True
+                model="gemini-1.5-flash",
+                response_format=WebsiteData
             )
 
             # Extract all relevant links
-            company_data.social_media_links.blog = website_info["blog_url"]
-            company_data.social_media_links.facebook = website_info["facebook"]
-            company_data.social_media_links.twitter = website_info["twitter"]
-            company_data.social_media_links.youtube = website_info["youtube"]
+            company_data.social_media_links.blog = website_info.blog_url
+            company_data.social_media_links.facebook = website_info.facebook
+            company_data.social_media_links.twitter = website_info.twitter
+            company_data.social_media_links.youtube = website_info.youtube
                  
         inputs = f"""
-        # **Lead LinkedIn Information:**
-
-        ## Name: {lead_data.name}
-
-        ## Profile:
+        # **Lead Profile:**
 
         {lead_data.profile}
 
-        # **Company LinkedIn Information:**
+        # **Company Information:**
 
         {company_data.profile}
-
-        # **Company Website Information:**
-
-        {website_info["summary"]}
         """
         
         # Generate general lead search report
         general_lead_search_report = invoke_llm(
             system_prompt=LEAD_SEARCH_REPORT_PROMPT, 
             user_message=inputs,
-            model="gemini/gemini-1.5-flash"
+            model="gemini-1.5-flash"
         )
         
         lead_search_report = Report(
@@ -151,10 +150,10 @@ class OutReachAutomationNodes:
         }
     
     @staticmethod
-    def collect_company_information(state):
+    def collect_company_information(state: GraphState):
         return {"reports": []}
     
-    def analyze_blog_content(self, state):
+    def analyze_blog_content(self, state: GraphState):
         print(Fore.YELLOW + "----- Analyzing company main blog -----\n" + Style.RESET_ALL)  
         blog_analysis_report = ""
         
@@ -167,7 +166,7 @@ class OutReachAutomationNodes:
             blog_analysis_report = invoke_llm(
                 system_prompt=prompt, 
                 user_message=blog_content,
-                model="gemini/gemini-1.5-flash"
+                model="gemini-1.5-flash"
             )
             blog_analysis_report = Report(
                 title="Blog Analysis Report",
@@ -176,7 +175,7 @@ class OutReachAutomationNodes:
             )
         return {"reports": [blog_analysis_report]}
     
-    def analyze_social_media_content(self, state):
+    def analyze_social_media_content(self, state: GraphState):
         print(Fore.YELLOW + "----- Analyzing company social media accounts -----\n" + Style.RESET_ALL)
         
         # Load states
@@ -194,7 +193,7 @@ class OutReachAutomationNodes:
             youtube_insight = invoke_llm(
                 system_prompt=prompt, 
                 user_message=youtube_data,
-                model="gemini/gemini-1.5-flash"
+                model="gemini-1.5-flash"
             )
             youtube_analysis_report = Report(
                 title="Youtube Analysis Report",
@@ -217,8 +216,7 @@ class OutReachAutomationNodes:
             "reports": [youtube_analysis_report]
         }
     
-
-    def analyze_recent_news(self, state):
+    def analyze_recent_news(self, state: GraphState):
         print(Fore.YELLOW + "----- Analyzing recent news about company -----\n" + Style.RESET_ALL)
         
         # Load states
@@ -238,7 +236,7 @@ class OutReachAutomationNodes:
         news_insight = invoke_llm(
             system_prompt=news_analysis_prompt, 
             user_message=recent_news,
-            model="gemini/gemini-1.5-flash"
+            model="gemini-1.5-flash"
         )
         
         news_analysis_report = Report(
@@ -248,7 +246,7 @@ class OutReachAutomationNodes:
         )
         return {"reports": [news_analysis_report]}
     
-    def generate_digital_presence_report(self, state):
+    def generate_digital_presence_report(self, state: GraphState):
         print(Fore.YELLOW + "----- Generate Digital presence analysis report -----\n" + Style.RESET_ALL)
         
         # Load reports
@@ -288,7 +286,7 @@ class OutReachAutomationNodes:
         digital_presence_report = invoke_llm(
             system_prompt=prompt, 
             user_message=inputs,
-            model="gemini/gemini-1.5-flash"
+            model="gemini-1.5-flash"
         ) 
         
         digital_presence_report = Report(
@@ -298,7 +296,7 @@ class OutReachAutomationNodes:
         )
         return {"reports": [digital_presence_report]}
     
-    def generate_full_lead_research_report(self, state):
+    def generate_full_lead_research_report(self, state: GraphState):
         print(Fore.YELLOW + "----- Generate global lead analysis report -----\n" + Style.RESET_ALL)
         
         # Load reports
@@ -324,7 +322,7 @@ class OutReachAutomationNodes:
         full_report = invoke_llm(
             system_prompt=prompt, 
             user_message=inputs,
-            model="gemini/gemini-1.5-flash"
+            model="gemini-1.5-flash"
         )
         
         global_research_report = Report(
@@ -335,7 +333,7 @@ class OutReachAutomationNodes:
         return {"reports": [global_research_report]}
     
     @staticmethod
-    def score_lead(state):
+    def score_lead(state: GraphState):
         """
         Score the lead based on the company profile and open positions.
 
@@ -352,12 +350,12 @@ class OutReachAutomationNodes:
         lead_score = invoke_llm(
             system_prompt=SCORE_LEAD_PROMPT,
             user_message=global_research_report,
-            model="gemini/gemini-1.5-pro"
+            model="gemini-1.5-pro"
         )
         return {"lead_score": lead_score.strip()}
 
     @staticmethod
-    def is_lead_qualified(state):
+    def is_lead_qualified(state: GraphState):
         """
         Check if the lead is qualified based on the lead score.
 
@@ -368,7 +366,7 @@ class OutReachAutomationNodes:
         return {"reports": []}
 
     @staticmethod
-    def check_if_qualified(state):
+    def check_if_qualified(state: GraphState):
         """
         Check if the lead is qualified based on the lead score.
 
@@ -386,10 +384,10 @@ class OutReachAutomationNodes:
             return "not qualified"
     
     @staticmethod
-    def create_outreach_materials(state):
+    def create_outreach_materials(state: GraphState):
         return {"reports": []}
     
-    def generate_custom_outreach_report(self, state):
+    def generate_custom_outreach_report(self, state: GraphState):
         print(Fore.YELLOW + "----- Crafting Custom outreach report based on gathered information -----\n" + Style.RESET_ALL)
         
         # Load reports
@@ -417,7 +415,7 @@ class OutReachAutomationNodes:
         custom_outreach_report = invoke_llm(
             system_prompt=GENERATE_OUTREACH_REPORT_PROMPT,
             user_message=inputs,
-            model="gemini/gemini-1.5-pro"
+            model="gemini-1.5-pro"
         )
         
         # TODO Find better way to include correct links into the final report
@@ -437,7 +435,7 @@ class OutReachAutomationNodes:
         revised_outreach_report = invoke_llm(
             system_prompt=PROOF_READER_PROMPT,
             user_message=inputs,
-            model="gemini/gemini-1.5-flash"
+            model="gemini-1.5-flash"
         )
         
         # Store report into google docs and get shareable link
@@ -455,7 +453,7 @@ class OutReachAutomationNodes:
             "reports_folder_link": new_doc["folder_url"]
         }
 
-    def generate_personalized_email(self, state):
+    def generate_personalized_email(self, state: GraphState):
         """
         Generate a personalized email for the lead.
 
@@ -480,17 +478,16 @@ class OutReachAutomationNodes:
         output = invoke_llm(
             system_prompt=PERSONALIZE_EMAIL_PROMPT,
             user_message=lead_data,
-            model="gemini/gemini-1.5-flash",
-            response_format=EmailResponse, 
-            json_output=True
+            model="gemini-1.5-flash",
+            response_format=EmailResponse
         )
         
         # Get relevant fields
-        subject = output["subject"]
-        personalized_email = output["email"]
+        subject = output.subject
+        personalized_email = output.email
         
         # Get lead email
-        email = state["lead_data"].email
+        email = state["current_lead"].email
         
         # Create draft email
         gmail = GmailTools()
@@ -516,7 +513,7 @@ class OutReachAutomationNodes:
         )
         return {"reports": [personalized_email_doc]}
 
-    def generate_interview_script(self, state):
+    def generate_interview_script(self, state: GraphState):
         print(Fore.YELLOW + "----- Generating interview script -----\n" + Style.RESET_ALL)
         
         # Load reports
@@ -527,7 +524,7 @@ class OutReachAutomationNodes:
         spin_questions = invoke_llm(
             system_prompt=GENERATE_SPIN_QUESTIONS_PROMPT,
             user_message=global_research_report,
-            model="gemini/gemini-1.5-flash"
+            model="gemini-1.5-flash"
         )
         
         inputs = f"""
@@ -544,7 +541,7 @@ class OutReachAutomationNodes:
         interview_script = invoke_llm(
             system_prompt=WRITE_INTERVIEW_SCRIPT_PROMPT,
             user_message=inputs,
-            model="gemini/gemini-1.5-flash"
+            model="gemini-1.5-flash"
         )
         
         interview_script_doc = Report(
@@ -556,10 +553,10 @@ class OutReachAutomationNodes:
         return {"reports": [interview_script_doc]}
     
     @staticmethod
-    def await_reports_creation(state):
+    def await_reports_creation(state: GraphState):
         return {"reports": []}
     
-    def save_reports_to_google_docs(self, state):
+    def save_reports_to_google_docs(self, state: GraphState):
         print(Fore.YELLOW + "----- Save Reports to Google Docs -----\n" + Style.RESET_ALL)
         
         # Load all reports
@@ -580,7 +577,7 @@ class OutReachAutomationNodes:
 
         return state
 
-    def update_CRM(self, state):
+    def update_CRM(self, state: GraphState):
         print(Fore.YELLOW + "----- Updating CRM records -----\n" + Style.RESET_ALL)
         
         # save new record data, ensure correct fields are used
@@ -591,9 +588,9 @@ class OutReachAutomationNodes:
             "Outreach Report": state["custom_outreach_report_link"],
             "Last Contacted": get_current_date()
         }
-        self.lead_loader.update_record(state["lead_data"].id, new_data)
+        self.lead_loader.update_record(state["current_lead"].id, new_data)
         
         # reset reports list
         state["reports"] = []
         
-        return {"num_leads": state["num_leads"] - 1}
+        return {"number_leads": state["number_leads"] - 1}

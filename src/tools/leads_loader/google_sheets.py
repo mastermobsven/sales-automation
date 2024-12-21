@@ -9,8 +9,12 @@ class GoogleSheetLeadLoader(LeadLoaderBase):
         self.sheet_service = build("sheets", "v4", credentials=get_google_credentials())
         self.spreadsheet_id = spreadsheet_id
         self.sheet_name = sheet_name or self._get_sheet_name_from_id()
-
-    def fetch_records(self, status_filter="NEW"):
+        
+    def fetch_records(self, lead_ids=None, status_filter="NEW"):
+        """
+        Fetches leads from Google Sheets. If lead IDs are provided, fetch those specific records.
+        Otherwise, fetch leads matching the given status.
+        """
         try:
             result = self.sheet_service.spreadsheets().values().get(
                 spreadsheetId=self.spreadsheet_id, range=self.sheet_name
@@ -18,15 +22,19 @@ class GoogleSheetLeadLoader(LeadLoaderBase):
             rows = result.get("values", [])
             headers = rows[0]
             records = []
+
             for i, row in enumerate(rows[1:], start=2):  # Start from row 2 for data
                 record = dict(zip(headers, row))
-                record["id"] = i  # Add row number as an ID
-                if record.get("Status") == status_filter:
-                    records.append({
-                        "id": i,
-                        "name": record.get("Name", ""),
-                        "email": record.get("Email", ""),
-                    })
+                record["id"] = f"{i}"  # Add row number as an ID
+
+                if lead_ids:
+                    if record["id"] in lead_ids:
+                        records.append(record)
+                # Fetch leads by status filter (based on "Status" field)
+                # You can choose your own field for filter with different naming
+                elif record.get("Status") == status_filter:
+                    records.append(record)
+                    
             return records
         except HttpError as e:
             print(f"Error fetching records from Google Sheets: {e}")

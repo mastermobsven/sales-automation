@@ -25,29 +25,9 @@ if __name__ == "__main__":
     automation = OutReachAutomation(lead_loader)
     app = automation.app
     
-    # initial graph inputs
-    inputs = {
-        "leads": [],
-        "lead_data": LeadData(id="", name="", email="", profile=""),
-        "lead_score": "",
-        "company_data": CompanyData(
-            name="", 
-            profile="", 
-            website="", 
-            social_media_links=SocialMediaLinks(
-                blog="", 
-                facebook="", 
-                twitter="", 
-                youtube=""
-            )
-        ),
-        "reports": [],
-        "custom_outreach_report_link": "",
-        "reports_folder_link": "",
-        "personalized_email": "", 
-        "interview_script": "", 
-        "num_leads": 0
-    }
+    # initial graph inputs:
+    # Lead ids to be processed, leave empty to fetch all news leads
+    inputs = {"leads_ids": []}
 
 
     # Run the outreach automation with the provided lead name and email

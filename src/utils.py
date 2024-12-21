@@ -1,8 +1,7 @@
 import os
-import json
-import requests
-from litellm import completion
 from datetime import datetime
+from langchain_core.messages import SystemMessage, HumanMessage
+from langchain_core.output_parsers import StrOutputParser
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -22,18 +21,6 @@ SCOPES = [
 def get_current_date():
     return datetime.now().strftime("%Y-%m-%d")
 
-def extract_company_name(email):
-    """
-    Extracts the company name from a professional email address.
-    """
-    try:
-        # Split the email to get the domain part
-        company_name = email.split('@')[1]
-        return company_name
-    except IndexError:
-        return "Company not found"
-    
-    
 def get_google_credentials():
     creds = None
     if os.path.exists('token.json'):
@@ -47,38 +34,7 @@ def get_google_credentials():
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
     return creds
-
-def google_search(query):
-    """
-    Performs a Google search using the provided query.
-    """
-    url = "https://google.serper.dev/search"
-    payload = json.dumps({"q": query})
-    headers = {
-        'X-API-KEY': os.environ['SERPER_API_KEY'],
-        'content-type': 'application/json'
-    }
-    response = requests.request("POST", url, headers=headers, data=payload)
-    results = response.json().get('organic', [])
-    return results
-
-def invoke_llm(system_prompt, user_message, model, response_format=None, json_output=False):
-    messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_message}
-    ]
-    response = completion(
-        model=model,
-        messages=messages,
-        temperature=0.1,
-        response_format=response_format
-    )
-    output = response.choices[0].message.content
     
-    if json_output:
-        return json.loads(output)
-    return output
-
 def get_report(reports, report_name: str):
     """
     Retrieves the content of a report by its title.
@@ -101,3 +57,45 @@ def save_reports_locally(reports):
         file_path = os.path.join(reports_folder, f"{report.title}.txt")
         with open(file_path, "w", encoding="utf-8") as file:
             file.write(report.content)
+
+def get_llm_by_provider(llm_provider, model):
+    # Else find provider
+    if llm_provider == "openai":
+        from langchain_openai import ChatOpenAI
+        llm = ChatOpenAI(model=model, temperature=0.1)
+    elif llm_provider == "anthropic":
+        from langchain_anthropic import ChatAnthropic
+        llm = ChatAnthropic(model=model, temperature=0.1)  # Use the correct model name
+    elif llm_provider == "google":
+        from langchain_google_genai import ChatGoogleGenerativeAI
+        llm = ChatGoogleGenerativeAI(model=model, temperature=0.1)  # Correct model name
+    # ... add elif blocks for other providers ...
+    else:
+        raise ValueError(f"Unsupported LLM provider: {llm_provider}")
+    return llm
+
+def invoke_llm(
+    system_prompt,
+    user_message,
+    model="gemini-1.5-flash",  # Specify the model name according to the provider
+    llm_provider="google",  # By default use Google as provider
+    response_format=None
+):
+    messages = [
+        SystemMessage(content=system_prompt),
+        HumanMessage(content=user_message),
+    ]  
+    
+    # Get base llm
+    llm = get_llm_by_provider(llm_provider, model)
+    
+    # If Response format is provided the use structured output
+    if response_format:
+        llm = llm.with_structured_output(response_format)
+    else: # Esle use parse string output
+        llm = llm | StrOutputParser()
+    
+    # Invoke LLM
+    output = llm.invoke(messages)
+    
+    return output

@@ -146,7 +146,7 @@ For developers who wish to integrate their own CRM or customize the behavior of 
 - **Add your own service/productt data**: The `/data` folder includes agency details and past case studies used in reports, emails, and interviews generation. You should update these files to reflect your own service/product details and your past case studies.
 - **Integrating Custom CRMs**: Instructions for adding your CRM to the system by extending the base class.
 - **Customizing Lead Statuses**: Learn how to modify the statuses used to filter and fetch leads.
-- **Updating CRM Fields**: Tailor the `update_CRM` function to handle different field names or additional fields.
+- **Updating CRM Fields**: Tailor the functions in the `OutReachAutomationNodes` class to handle different CRM field names or additional fields.
 - **Customizing Prompts**: Update the prompts used for qualifying leads, generating reports, personalizing emails, and preparing interview questions.
 
 ---

@@ -18,12 +18,9 @@ To integrate your custom CRM with the `LeadLoaderBase` class, you need to inheri
 
 By default, the available statuses used in the `LeadLoaderBase` class are:
 ```python
-available_statuses = [
-    "NEW",
-    "UNQUALIFIED",
-    "ATTEMPTED_TO_CONTACT"
-]
+available_statuses = ["NEW","CONTACTED"]
 ```
+
 However, these statuses can be customized to match the specific lead status values in your CRM.
 
 ### Steps to Add a Custom CRM Integration
@@ -37,55 +34,48 @@ However, these statuses can be customized to match the specific lead status valu
            # Initialize any API clients or configurations here
            self.api_key = api_key
            self.custom_parameter = custom_parameter
+    
+    def fetch_records(self, lead_ids=None, status="NEW"):
+        """
+        Fetch leads from your CRM.
+        - If `lead_ids` is provided, fetch those specific leads.
+        - Otherwise, fetch leads matching the given status.
+        """
+        if lead_ids:
+            leads = []
+            for lead_id in lead_ids:
+                lead = crm_api.get_lead(lead_id)  # Replace with your CRM API call
+                if lead:
+                    # Extract all fields provided by database
+                    lead = {"id": record["id"], **record.get("fields", {})}
+            return leads
+        else:
+            # Fetch leads matching the status
+            records = crm_api.get_leads_by_status(status)  # Replace with your CRM API call
+            return [
+                {"id": record["id"], **record.get("fields", {})}  # Extract all fields provided by database dynamically
+                for record in records
+            ]
 
-       def fetch_records(self, status_filter="NEW"):
-           # Implement API call to fetch leads from your CRM
-           leads = your_crm_api.get_leads(status=status_filter)
-           return [
-               {
-                   "id": lead.id,
-                   "name": lead.name,
-                   "email": lead.email,
-                   "phone": lead.phone
-               }
-               for lead in leads
-           ]
+    def update_record(self, lead_id, updates: dict):
+        """
+        Update a single lead record in your CRM.
 
-       def update_record(self, lead_id, updates: dict):
-           # Implement API call to update a lead in your CRM
-           updated_lead = your_crm_api.update_lead(lead_id, updates)
-           return updated_lead
+        Args:
+            lead_id (str): ID of the lead to update.
+            updates (dict): Dictionary of fields to update.
+
+        Returns:
+            dict: Updated lead record.
+        """
+        lead = crm_api.get_lead(lead_id)  # Replace with your CRM API call
+        if not lead:
+            raise ValueError(f"Lead with ID {lead_id} not found.")
+        updated_lead = crm_api.update_lead(lead_id, updates)  # Replace with your CRM API call
+        return updated_lead
    ```
 
-2. **Implement the `fetch_records` Method**
-   This method should interact with your CRM API and return a list of leads matching the `status_filter`. The return value should be a list of dictionaries, with each dictionary representing a lead, typically including fields such as `id`, `name`, `email`, and `phone`.
-
-   Example:
-   ```python
-   def fetch_records(self, status_filter="NEW"):
-       records = some_crm_api.get_leads(status=status_filter)
-       return [
-           {
-               "id": record.id,
-               "name": record.name,
-               "email": record.email,
-               "phone": record.phone
-           }
-           for record in records
-       ]
-   ```
-
-3. **Implement the `update_record` Method**
-   This method should accept a `lead_id` and an `updates` dictionary, where the keys in the dictionary correspond to the fields you want to update. The method should return the updated lead after the API call.
-
-   Example:
-   ```python
-   def update_record(self, lead_id, updates: dict):
-       updated_lead = some_crm_api.update_lead(lead_id, updates)
-       return updated_lead
-   ```
-
-4. **Customizing Lead Statuses**
+2. **Customizing Lead Statuses**
    By default, the class uses the following statuses:
    ```python
    available_statuses = [
@@ -108,19 +98,49 @@ However, these statuses can be customized to match the specific lead status valu
 
 ---
 
-## Customizing the `update_CRM` Function for Different Field Names
+## Customizing CRM Field Names
 
 ### Overview
-By default, the `update_CRM` function uses a fixed set of fields (e.g., "Status", "Score", "Analysis Reports", "Outreach Report", "Last Contacted") when updating a CRM record. However, different CRMs or database schemas may use different field names or additional fields that need to be handled.
+By default, in the `nodes` function uses the fields names used in my own database. However, different CRMs or database schemas may use different field names or additional fields that need to be handled.
 
-### Steps to Customize the `update_CRM` Function
+### Steps to Customize 
 
 1. **Identify the Fields in Your CRM**
    Each CRM or database may have different field names or additional fields. Start by identifying which fields you need to map from your system to the CRM. This may include:
    - Custom field names (e.g., `lead_score` instead of `Score`)
    - Additional fields (e.g., `custom_field_1`, `custom_field_2`)
 
-2. **Modify the `new_data` Dictionary**
+2. **Modify the `nodes::get_new_leads` Function**
+   The `get_new_leads` function fetches lead data from a database and structures it using specific field names (e.g., "First Name", "Last Name", "Email", etc.). If your database uses different field names, you will need to modify this function accordingly.
+
+   For example, if your database uses `first_name` instead of `First Name`, update the code like this:
+
+   ```python
+    def get_new_leads(self, lead_ids):
+        ...
+
+        # Fetch new leads using the provided loader
+        raw_leads = self.lead_loader.fetch_records()
+        
+        # Structure the leads
+        leads = [
+            LeadData(
+                id=lead["id"],
+                name=f'{lead.get("first_name", "")} {lead.get("Last Name", "")}',
+                email=lead.get("Email", ""),
+                phone=lead.get("Phone", ""),
+                address=lead.get("Address", ""),
+                profile="" # will be constructed
+            )
+            for lead in raw_leads
+        ]
+
+        ...
+   ```
+
+   **IMPORTANT**: The provided field names are based on the structure I use for my own database. If your database uses different field names, just update the code to reflect that.
+
+3. **Modify the `nodes::update_CRM` function**
    The `new_data` dictionary in the `update_CRM` function is where the lead data is prepared before updating the CRM. You can modify this dictionary to include your custom fields.
 
    For example, if your CRM has a custom field `custom_lead_score` instead of `Score`, you can modify the dictionary like this:
