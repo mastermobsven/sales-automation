@@ -4,7 +4,7 @@ from .tools.base.search_tools import get_recent_news
 from .tools.base.gmail_tools import GmailTools
 from .tools.google_docs_tools import GoogleDocsManager
 from .tools.lead_research import research_lead_on_linkedin
-from .tools.company_research import research_lead_company
+from .tools.company_research import research_lead_company, generate_company_profile
 from .tools.youtube_tools import get_youtube_stats
 from .tools.rag_tool import fetch_similar_case_study
 from .prompts import *
@@ -82,13 +82,13 @@ class OutReachAutomationNodes:
         ) = research_lead_on_linkedin(lead_data.name, lead_data.email)
         lead_data.profile = lead_profile
 
-        # Research company on linkedin and scrape website
-        company_profile = research_lead_company(company_linkedin_url, company_website)
+        # Research company on linkedin
+        company_profile = research_lead_company(company_linkedin_url)
         
         # Update company name from LinkedIn data
         company_data.name = company_name
         company_data.website = company_website
-        company_data.profile = company_profile
+        company_data.profile = str(company_profile)
             
         # Update folder name for saving reports in Drive
         self.drive_folder_name = f"{lead_data.name}_{company_data.name}"
@@ -106,7 +106,7 @@ class OutReachAutomationNodes:
         
         company_website = company_data.website
         if company_website:
-            # Scrape website
+            # Scrape company website
             content = scrape_website_to_markdown(company_website)
             website_info = invoke_llm(
                 system_prompt=WEBSITE_ANALYSIS_PROMPT.format(main_url=company_website), 
@@ -120,6 +120,9 @@ class OutReachAutomationNodes:
             company_data.social_media_links.facebook = website_info.facebook
             company_data.social_media_links.twitter = website_info.twitter
             company_data.social_media_links.youtube = website_info.youtube
+            
+            # Update company profile with website summary
+            company_data.profile = generate_company_profile(company_data.profile, website_info.summary)
                  
         inputs = f"""
         # **Lead Profile:**

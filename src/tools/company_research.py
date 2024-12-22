@@ -1,6 +1,5 @@
 from src.utils import invoke_llm
 from .base.linkedin_tools import scrape_linkedin
-from .base.markdown_scraper_tool import scrape_website_to_markdown
 
 CREATE_COMPANY_PROFILE = """
 ### Role  
@@ -25,7 +24,7 @@ This profile provides context for engaging with a prospect who works at the comp
 - Limit the profile to 300 words.  
 """
 
-def research_lead_company(linkedin_url, website_url):
+def research_lead_company(linkedin_url):
     # Scrape company LinkedIn profile
     company_page_content = scrape_linkedin(linkedin_url, True)
     if "data" not in company_page_content:
@@ -33,7 +32,7 @@ def research_lead_company(linkedin_url, website_url):
     
     # Structure collected information about company
     company_profile = company_page_content["data"]
-    company_profile_content = {
+    return {
         "company_name": company_profile.get('company_name', ''),
         "description": company_profile.get('description', ''),
         "year_founded": company_profile.get('year_founded', ''),
@@ -45,21 +44,16 @@ def research_lead_company(linkedin_url, website_url):
         },
         "locations": company_profile.get('locations', [])
     }
-    
-    # Scrape company website
-    if not website_url:
-        website_url = company_profile.get("website") 
-    scraped_website = scrape_website_to_markdown(website_url)
-    
-    # Get Lead Linkedin profile summary
+
+def generate_company_profile(company_linkedin_info, scraped_website):
+    # Get company profile summary
     inputs = (
         f"# Scraped Website:\n {scraped_website}\n\n"
-        f"# Company LinkedIn Information:\n{company_profile_content}"
+        f"# Company LinkedIn Information:\n{company_linkedin_info}"
     )
     profile_summary = invoke_llm(
         system_prompt=CREATE_COMPANY_PROFILE, 
         user_message=inputs,
         model="gemini-1.5-flash"
     )
-    
     return profile_summary

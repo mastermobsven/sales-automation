@@ -4,7 +4,7 @@ The provided webpage content is scraped from: {main_url}.
 # Tasks
 
 ## 1- Summarize webpage content:
-Write a 1500 words comprehensive summary in markdow format about the content of the webpage, focus on relevant information related to company mission, products and services.
+Write a 500 words comprehensive summary in markdow format about the content of the webpage, focus on relevant information related to company mission, products and services.
 
 ## 2- Extract and categorize the following links:
 1. Blog URL: Extract the main blog URL of the company. 
