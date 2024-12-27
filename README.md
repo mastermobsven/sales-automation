@@ -1,6 +1,6 @@
 # AI-Sales-Outreach-Automation
 
-**Read the full article [How AI Automation Can Transform Your Sales Outreach Strategy](https://kaymen.hashnode.dev/how-ai-automation-can-transform-your-sales-outreach-strategy)**
+### **Read the full article [How AI Automation Can Transform Your Sales Outreach Strategy](https://kaymen.hashnode.dev/how-ai-automation-can-transform-your-sales-outreach-strategy)**
 
 ![outreach-automation](https://github.com/user-attachments/assets/2685ef70-ab9f-4177-9b2a-71086f79726b)
 
