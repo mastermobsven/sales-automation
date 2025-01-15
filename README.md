@@ -1,6 +1,6 @@
 # AI-Sales-Outreach-Automation
 
-### **Read the full article [How AI Automation Can Transform Your Sales Outreach Strategy](https://kaymen.hashnode.dev/how-ai-automation-can-transform-your-sales-outreach-strategy)**
+### 👉 Dive into the full article: [**AI Agents + LangGraph: The Winning Formula for Sales Outreach Automation**](https://dev.to/kaymen99/how-ai-automation-can-transform-your-sales-outreach-strategy-aop)  
 
 ![outreach-automation](https://github.com/user-attachments/assets/2685ef70-ab9f-4177-9b2a-71086f79726b)
 
@@ -142,9 +142,9 @@ The system will connect with your CRM to fetch new leads, perform automated rese
 
 ### Customizing the Automation
 
-For developers who wish to integrate their own CRM or customize the behavior of the automation, please refer to the [Customization Guide](./CUSTOMIZATION.md). The guide covers:
+For developers who wish to integrate their own CRM or customize the behavior of the automation, please refer to the [Customization Guide](./docs/customization.md). The guide covers:
 
-- **Add your own service/productt data**: The `/data` folder includes agency details and past case studies used in reports, emails, and interviews generation. You should update these files to reflect your own service/product details and your past case studies.
+- **Add your own service/product data**: The `/data` folder includes agency details and past case studies used in reports, emails, and interviews generation. You should update these files to reflect your own service/product details and your past case studies.
 - **Integrating Custom CRMs**: Instructions for adding your CRM to the system by extending the base class.
 - **Customizing Lead Statuses**: Learn how to modify the statuses used to filter and fetch leads.
 - **Updating CRM Fields**: Tailor the functions in the `OutReachAutomationNodes` class to handle different CRM field names or additional fields.
